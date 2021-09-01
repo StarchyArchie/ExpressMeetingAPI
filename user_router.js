@@ -1,130 +1,130 @@
-//Server that handles REST requests for recipes url
+//Server that handles REST requests for users url
 
 var express = require('express');
-var recipesRouter = express.Router();
+var usersRouter = express.Router();
 /** 1- declare mongoose and users**/
 const mongoose = require('mongoose');
-let recipes = require('../models/recipes');
-recipesRouter.route('/') 
+let users = require('./users');
+usersRouter.route('/') 
 .get((req,res,next)=>{ //chained into route(), no semi-colon after the all implementation
-      // 2- implement get  to return all recipes  
-  	  recipes.find({}, (err, recipes)=>{  //get the recipes collection as an array,received as the recipe param
+      // 2- implement get  to return all users  
+  	  users.find({}, (err, users)=>{  //get the users collection as an array,received as the user param
 		   if (err) throw err; //propagate error
         // convert to json and return in res
-        res.json(recipes);
+        res.json(users);
 	   });
 	   
 })
 
 .post((req, res, next)=>{
-	// 3- implement post request to insert recipe into database
-	recipes.create(req.body,  (err, recipe)=>{
+	// 3- implement post request to insert user into database
+	users.create(req.body,  (err, user)=>{
 		   if(err) throw err; //propagate error
 		   
-		   console.log('recipe created');
-		   var id = recipe._id
-		   res.writeHead(200, {'Content-Type':'text-plain'}); //send reply back to the client with recipe id
-		   res.end('Added the recipe with id: ' + id);
+		   console.log('user created');
+		   var id = user._id
+		   res.writeHead(200, {'Content-Type':'text-plain'}); //send reply back to the client with user id
+		   res.end('Added the user with id: ' + id);
 		     
 	});
 })
 
 .delete((req, res, next)=>{
-       // 4- delete deletes all recipes in the collection
-	   recipes.remove({},(err, resp)=>{
+       // 4- delete deletes all users in the collection
+	   users.remove({},(err, resp)=>{
 		    if (err) throw err; //propagate error
 			
 			res.json(resp);
 		});
 });
 
-recipesRouter.route('/:recipeId') // a second router is define using parameters.
+usersRouter.route('/:userId') // a second router is define using parameters.
 
 .get((req,res,next)=>{
 	
 	  // 4- find by id 
-      recipes.findById(req.params.recipeId, (err, recipe)=>{  //get the recipes collection as an array,received as the recipe param
+      users.findById(req.params.userId, (err, user)=>{  //get the users collection as an array,received as the user param
 		   if (err) throw err; //propagate error
-		   res.json(recipe); // convert to Json and return in res
+		   res.json(user); // convert to Json and return in res
 	   });
 	 })
 
 .put((req, res, next)=>{
-	// 5- implement post request to update a specific recipe
-	recipes.findByIdAndUpdate();
+	// 5- implement post request to update a specific user
+	users.findByIdAndUpdate();
         
 })
 
 .delete((req, res, next)=>{
-      // 6- delete specific recipe in the collection
-	   recipes.findByIdAndRemove(req.params.recipeId,  (err, resp)=>{        
+      // 6- delete specific user in the collection
+	   users.findByIdAndRemove(req.params.userId,  (err, resp)=>{        
 				if (err) throw err;
 				res.json(resp);
 		});
 });
 
 /**
-  7- added the comments routing and handling
+  7- added the address routing and handling
 **/
-recipesRouter.route('/:recipeId/comments')
+usersRouter.route('/:userId/address')
 .get( (req, res, next)=>{
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
+    users.findById(req.params.userId,  (err, user)=>{
         if (err) throw err;
-      //return recipe.comments
-        res.json(recipe.comments);
+      //return user.address
+        res.json(user.address);
     });
 })
 
 .post( (req, res, next)=>{
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
+    users.findById(req.params.userId,  (err, user)=>{
         if (err) throw err;
-        recipe.comments.push(req.body);
-        recipe.save((err,recipe)=>{
+        user.address.push(req.body);
+        user.save((err,user)=>{
             if (err) throw err;
-            console.log("Comments updated");
-            res.json(recipe);
+            console.log("address updated");
+            res.json(user);
         })
 	});
 })
 
 .delete( (req, res, next)=>{
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
+    users.findById(req.params.userId,  (err, user)=>{
         if (err) throw err;
-        for(let i = (recipe.comments.length-1);i>=0; i--){
-            recipe.comments.id(recipe.comments[i]._id).remove();
+        for(let i = (user.address.length-1);i>=0; i--){
+            user.address.id(user.address[i]._id).remove();
         }
     });
     
 });
 
-recipesRouter.route('/:recipeId/comments/:commentId')
+usersRouter.route('/:userId/address/:addressId')
 .get( (req, res, next)=>{
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
+    users.findById(req.params.userId,  (err, user)=>{
         if (err) throw err;
-        //return the comment using commentid in the respond object
-        res.json(recipe.comments.id(req.params.commentId));
+        //return the address using addressid in the respond object
+        res.json(user.address.id(req.params.addressId));
     });
 })
 
 .put( (req, res, next)=>{
     // We delete the existing commment and insert the updated
-    // comment as a new comment
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
+    // address as a new address
+    users.findById(req.params.userId,  (err, user)=>{
         if (err) throw err;
-            recipe.comments.id(req.params.commentId).remove();
-            recipe.comments.push(req.body);
-            recipe.save((err,recipe)=>{
+            user.address.id(req.params.addressId).remove();
+            user.address.push(req.body);
+            user.save((err,user)=>{
                 if (err) throw err;
-                console.log("Comments updated");
-                res.json(recipe);
+                console.log("address updated");
+                res.json(user);
             })
         });
 })
 
 .delete( (req, res, next)=>{
-    recipes.findById(req.params.recipeId,  (err, recipe)=>{
-        recipe.comments.id(req.params.commentId).remove(); //remove a single comment
-        recipe.save( (err, resp)=>{
+    users.findById(req.params.userId,  (err, user)=>{
+        user.address.id(req.params.addressId).remove(); //remove a single address
+        user.save( (err, resp)=>{
             if (err) throw err;
             res.json(resp);
         });
